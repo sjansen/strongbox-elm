@@ -1,0 +1,2 @@
+locked.svg      https://pixabay.com/en/chests-open-closed-storage-box-34153/
+unlocked.svg    https://pixabay.com/en/chests-open-closed-storage-box-34153/

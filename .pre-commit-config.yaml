@@ -1,0 +1,21 @@
+repos:
+-  repo: local
+   hooks:
+   -  id: elm-format
+      name: elm-format
+      language: system
+      entry: cd webui && ./node_modules/.bin/elm-format --validate
+      pass_filenames: true
+      files: \.elm$
+   -  id: go-vet
+      name: go vet
+      language: system
+      entry: cd backend && go vet -tags integration ./...
+      pass_filenames: false
+      types: [go]
+   -  id: go-lint
+      name: golangci
+      language: system
+      entry: cd backend && golangci-lint run
+      pass_filenames: false
+      types: [go]

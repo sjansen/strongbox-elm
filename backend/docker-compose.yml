@@ -1,0 +1,12 @@
+version: '2.1'
+services:
+  go:
+    build:
+      context: ./docker/go
+    command: ./scripts/run-all-tests
+    environment:
+      GO111MODULE: "on"
+    volumes:
+     - .:/go/src/github.com/sjansen/strongbox-elm
+     - "${GOPATH:-/tmp}/pkg/mod:/go/pkg/mod"
+    working_dir: /go/src/github.com/sjansen/strongbox-elm

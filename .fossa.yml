@@ -1,0 +1,13 @@
+version: 1
+cli:
+  server: https://app.fossa.io
+  fetcher: custom
+  project: strongbox-elm
+analyze:
+  modules:
+  - name: github.com/sjansen/strongbox-elm/backend
+    type: go
+    target: github.com/sjansen/strongbox-elm/backend
+    path: backend
+    options:
+      all-tags: true
