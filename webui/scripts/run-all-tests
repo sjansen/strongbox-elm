@@ -1,0 +1,7 @@
+#!/bin/sh
+set -e
+
+echo node `node --version`
+echo yarn `yarn --version`
+yarn install
+yarn test

@@ -4,9 +4,16 @@ matrix:
     - language: elm
       node_js: '10'
       elm: '0.19.0'
+      services:
+        - docker
 
       before_script:
         - cd webui
+
+      script:
+        - docker-compose --version
+        - docker-compose build --pull elm
+        - docker-compose up --abort-on-container-exit --exit-code-from=elm --force-recreate
 
     - language: go
       go:

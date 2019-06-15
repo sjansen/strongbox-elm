@@ -1,0 +1,15 @@
+version: '2.1'
+services:
+  elm:
+    build:
+      context: ./docker/elm
+    command: ./scripts/run-all-tests
+    volumes:
+     - ./elm.json:/webui/elm.json
+     - ./package.json:/webui/package.json
+     - ./yarn.lock:/webui/yarn.lock
+     - ./public:/webui/public
+     - ./scripts:/webui/scripts
+     - ./src:/webui/src
+     - ./tests:/webui/tests
+    working_dir: /webui
