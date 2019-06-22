@@ -31,33 +31,35 @@ func main() {
 		port = defaultPort
 	}
 
-	session := scs.NewSession()
-	session.Cookie.Name = "strongbox-session"
-	session.Cookie.Persist = true
-	session.IdleTimeout = 30 * time.Minute
-	session.Lifetime = 3 * time.Hour
-	//session.Cookie.Domain = "example.com"
-	//session.Cookie.HttpOnly = true
-	//session.Cookie.SameSite = http.SameSiteStrictMode
-	//session.Cookie.Secure = true
+	sm := scs.New()
+	sm.Cookie.Name = "strongbox-session"
+	sm.Cookie.Persist = true
+	sm.IdleTimeout = 30 * time.Minute
+	sm.Lifetime = 3 * time.Hour
+	//sm.Cookie.Domain = "example.com"
+	//sm.Cookie.HttpOnly = true
+	//sm.Cookie.SameSite = http.SameSiteStrictMode
+	//sm.Cookie.Secure = true
 
 	mux := http.NewServeMux()
 	mux.Handle("/", handler.Playground("GraphQL playground", "/api/graphql"))
-	mux.Handle("/api/graphql", handler.GraphQL(graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}})))
+	mux.Handle("/api/graphql", handler.GraphQL(
+		graph.NewExecutableSchema(graph.Config{Resolvers: &graph.Resolver{}})),
+	)
 	mux.HandleFunc("/session", getHandler)
 	// auth
 	auth := auth.Authenticator{
-		ClientID:     clientID,
-		ClientSecret: clientSecret,
-		Issuer:       issuer,
-		RedirectURL:  redirectURL,
-		Session:      session,
+		ClientID:       clientID,
+		ClientSecret:   clientSecret,
+		Issuer:         issuer,
+		RedirectURL:    redirectURL,
+		SessionManager: sm,
 	}
 	mux.HandleFunc("/login", auth.LoginHandler)
 	mux.HandleFunc("/logout", auth.LogoutHandler)
 	mux.HandleFunc("/authorization-code/callback", auth.AuthCodeCallbackHandler)
 
-	handler := session.LoadAndSave(
+	handler := sm.LoadAndSave(
 		auth.Middleware(mux),
 	)
 	log.Printf("connect to http://localhost:%s/ for GraphQL playground", port)

@@ -40,20 +40,20 @@ func generateNonce() (string, error) {
 }
 
 type Authenticator struct {
-	ClientID     string
-	ClientSecret string
-	Issuer       string
-	RedirectURL  string
-	Session      *scs.Session
+	ClientID       string
+	ClientSecret   string
+	Issuer         string
+	RedirectURL    string
+	SessionManager *scs.SessionManager
 }
 
 func (a *Authenticator) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
-		session := a.Session
+		sm := a.SessionManager
 		user := &User{
-			Email:      session.GetString(r.Context(), "email"),
-			FamilyName: session.GetString(r.Context(), "family_name"),
-			GivenName:  session.GetString(r.Context(), "given_name"),
+			Email:      sm.GetString(r.Context(), "email"),
+			FamilyName: sm.GetString(r.Context(), "family_name"),
+			GivenName:  sm.GetString(r.Context(), "given_name"),
 		}
 		ctx := context.WithValue(r.Context(), authCtxKey, user)
 
@@ -65,9 +65,9 @@ func (a *Authenticator) Middleware(next http.Handler) http.Handler {
 func (a *Authenticator) LoginHandler(w http.ResponseWriter, r *http.Request) {
 	nonce, _ := generateNonce()
 	state, _ := generateNonce()
-	session := a.Session
-	session.Put(r.Context(), "auth-nonce", nonce)
-	session.Put(r.Context(), "auth-state", state)
+	sm := a.SessionManager
+	sm.Put(r.Context(), "auth-nonce", nonce)
+	sm.Put(r.Context(), "auth-state", state)
 
 	q := r.URL.Query()
 	q.Add("client_id", a.ClientID)
@@ -83,7 +83,7 @@ func (a *Authenticator) LoginHandler(w http.ResponseWriter, r *http.Request) {
 }
 
 func (a *Authenticator) LogoutHandler(w http.ResponseWriter, r *http.Request) {
-	_ = a.Session.Destroy(r.Context())
+	_ = a.SessionManager.Destroy(r.Context())
 	http.Redirect(w, r, "/", http.StatusFound)
 }
 
@@ -97,8 +97,8 @@ func (a *Authenticator) AuthCodeCallbackHandler(w http.ResponseWriter, r *http.R
 	accessToken, idToken := a.getTokens(code, r)
 
 	ctx := r.Context()
-	session := a.Session
-	state := session.PopString(ctx, "auth-state")
+	sm := a.SessionManager
+	state := sm.PopString(ctx, "auth-state")
 	if state != r.URL.Query().Get("state") {
 		http.Error(w, "callback state mismatch", http.StatusInternalServerError)
 		return
@@ -107,7 +107,7 @@ func (a *Authenticator) AuthCodeCallbackHandler(w http.ResponseWriter, r *http.R
 	jv := verifier.JwtVerifier{
 		Issuer: a.Issuer,
 		ClaimsToValidate: map[string]string{
-			"nonce": session.PopString(ctx, "auth-nonce"),
+			"nonce": sm.PopString(ctx, "auth-nonce"),
 			"aud":   a.ClientID,
 		},
 	}
@@ -122,9 +122,9 @@ func (a *Authenticator) AuthCodeCallbackHandler(w http.ResponseWriter, r *http.R
 	}
 
 	data := a.getProfileData(accessToken)
-	session.Put(r.Context(), "email", data["email"])
-	session.Put(r.Context(), "given_name", data["given_name"])
-	session.Put(r.Context(), "family_name", data["family_name"])
+	sm.Put(r.Context(), "email", data["email"])
+	sm.Put(r.Context(), "given_name", data["given_name"])
+	sm.Put(r.Context(), "family_name", data["family_name"])
 	http.Redirect(w, r, "/session", http.StatusFound)
 }
 
@@ -159,10 +159,10 @@ func (a *Authenticator) getTokens(code string, r *http.Request) (accessToken, id
 		TokenType        string `json:"token_type,omitempty"`
 		ExpiresIn        int    `json:"expires_in,omitempty"`
 		Scope            string `json:"scope,omitempty"`
-		IdToken          string `json:"id_token,omitempty"`
+		IDToken          string `json:"id_token,omitempty"`
 	}{}
 	_ = json.Unmarshal(body, &tmp)
-	return tmp.AccessToken, tmp.IdToken
+	return tmp.AccessToken, tmp.IDToken
 }
 
 func (a *Authenticator) getProfileData(accessToken string) map[string]string {
