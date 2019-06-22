@@ -2,6 +2,8 @@ version: '2.1'
 services:
   go:
     command: ./scripts/run-all-tests
+    environment:
+      DYNAMOSTORE_ENDPOINT: "http://dynamodb:8000"
     volumes:
      - .:/go/src/github.com/sjansen/strongbox-elm
      - "${GOPATH:-/tmp}/pkg/mod:/go/pkg/mod"

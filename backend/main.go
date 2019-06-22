@@ -40,6 +40,14 @@ func main() {
 	//sm.Cookie.HttpOnly = true
 	//sm.Cookie.SameSite = http.SameSiteStrictMode
 	//sm.Cookie.Secure = true
+	if dynamostoreEndpoint != "" {
+		store, err := newDynamoStore(dynamostoreEndpoint)
+		if err != nil {
+			fmt.Fprintln(os.Stderr, err.Error())
+			os.Exit(1)
+		}
+		sm.Store = store
+	}
 
 	mux := http.NewServeMux()
 	mux.Handle("/", handler.Playground("GraphQL playground", "/api/graphql"))
