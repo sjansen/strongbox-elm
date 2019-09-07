@@ -6,6 +6,8 @@ github.com/agnivade/levenshtein v1.0.2 h1:xKF7WlEzoa+ZVkzBxy0ukdzI2etYiWGlTPMNTB
 github.com/agnivade/levenshtein v1.0.2/go.mod h1:JLvzGblJATanj48SD0YhHTEFGkWvw3ASLFWSiMIFXsE=
 github.com/alexedwards/scs/v2 v2.1.0 h1:DMObg07KRF16TLpLytA4u0L9rzbuX0clD0BwHQkzAKo=
 github.com/alexedwards/scs/v2 v2.1.0/go.mod h1:ToaROZxyKukJKT/xLcVQAChi5k6+Pn1Gvmdl7h3RRj8=
+github.com/alexedwards/scs/v2 v2.2.0 h1:C0iQ8WHgzEe0zck4whkzvCXnLMP/rw2AM6BdQYNa4/c=
+github.com/alexedwards/scs/v2 v2.2.0/go.mod h1:ToaROZxyKukJKT/xLcVQAChi5k6+Pn1Gvmdl7h3RRj8=
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883 h1:bvNMNQO63//z+xNgfBlViaCIJKLlCJ6/fmUseuG0wVQ=
 github.com/andreyvit/diff v0.0.0-20170406064948-c7f18ee00883/go.mod h1:rCTlJbsFo29Kk6CurOXKm700vrz8f0KW0JNfpkRJY/8=
 github.com/aws/aws-sdk-go v1.20.4 h1:czX3oqFyqz/AELrK/tneNuyZgNIrWnyqP+iQXsQ32E0=
