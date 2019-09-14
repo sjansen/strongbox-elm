@@ -6,7 +6,7 @@ require (
 	github.com/99designs/gqlgen v0.9.0
 	github.com/agnivade/levenshtein v1.0.2 // indirect
 	github.com/alexedwards/scs/v2 v2.1.0
-	github.com/aws/aws-sdk-go v1.20.4
+	github.com/aws/aws-sdk-go v1.23.21
 	github.com/gorilla/websocket v1.4.0 // indirect
 	github.com/hashicorp/golang-lru v0.5.1 // indirect
 	github.com/lestrrat-go/jwx v0.9.0 // indirect
