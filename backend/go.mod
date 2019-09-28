@@ -3,7 +3,7 @@ module github.com/sjansen/strongbox-elm/backend
 go 1.12
 
 require (
-	github.com/99designs/gqlgen v0.9.0
+	github.com/99designs/gqlgen v0.10.1
 	github.com/agnivade/levenshtein v1.0.2 // indirect
 	github.com/alexedwards/scs/v2 v2.1.0
 	github.com/aws/aws-sdk-go v1.20.4
