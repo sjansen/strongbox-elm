@@ -13,5 +13,5 @@ require (
 	github.com/okta/okta-jwt-verifier-golang v0.0.0-20180501213203-04702def3e1b
 	github.com/sjansen/dynamostore v0.0.0-20190621133123-71c0c3e61122
 	github.com/stretchr/testify v1.3.0
-	github.com/vektah/gqlparser v1.1.2
+	github.com/vektah/gqlparser v1.2.0
 )
