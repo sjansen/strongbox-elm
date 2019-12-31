@@ -8,6 +8,6 @@ analyze:
   - name: github.com/sjansen/strongbox-elm/backend
     type: go
     target: github.com/sjansen/strongbox-elm/backend
-    path: backend
+    path: .
     options:
       all-tags: true
