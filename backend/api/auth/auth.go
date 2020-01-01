@@ -142,7 +142,7 @@ func (a *Authenticator) AuthCodeCallbackHandler(w http.ResponseWriter, r *http.R
 	sm.Put(r.Context(), "email", data["email"])
 	sm.Put(r.Context(), "given_name", data["given_name"])
 	sm.Put(r.Context(), "family_name", data["family_name"])
-	http.Redirect(w, r, "/session", http.StatusFound)
+	http.Redirect(w, r, "/", http.StatusFound)
 }
 
 func (a *Authenticator) getTokens(code string, r *http.Request) (accessToken, idToken string) {
