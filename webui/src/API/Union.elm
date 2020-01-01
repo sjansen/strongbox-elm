@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module API.Union exposing (placeholder)
+module API.Union exposing (..)
 
 
 placeholder : String

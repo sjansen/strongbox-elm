@@ -2,18 +2,9 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module API.ScalarCodecs exposing (Id, codecs)
-
-import API.Scalar exposing (defaultCodecs)
-import Json.Decode as Decode exposing (Decoder)
+module API.ScalarCodecs exposing (..)
 
 
-type alias Id =
-    API.Scalar.Id
-
-
-codecs : API.Scalar.Codecs Id
-codecs =
-    API.Scalar.defineCodecs
-        { codecId = defaultCodecs.codecId
-        }
+placeholder : String
+placeholder =
+    ""

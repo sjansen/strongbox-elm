@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module API.Query exposing (message)
+module API.Query exposing (..)
 
 import API.InputObject
 import API.Interface
@@ -19,7 +19,11 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode exposing (Decoder)
 
 
-{-| -}
 message : SelectionSet decodesTo API.Object.Message -> SelectionSet (Maybe decodesTo) RootQuery
 message object_ =
     Object.selectionForCompositeField "message" [] object_ (identity >> Decode.nullable)
+
+
+whoami : SelectionSet decodesTo API.Object.User -> SelectionSet (Maybe decodesTo) RootQuery
+whoami object_ =
+    Object.selectionForCompositeField "whoami" [] object_ (identity >> Decode.nullable)

@@ -2,8 +2,12 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module API.Object exposing (Message(..))
+module API.Object exposing (..)
 
 
 type Message
     = Message
+
+
+type User
+    = User

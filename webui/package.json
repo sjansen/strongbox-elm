@@ -12,7 +12,7 @@
     "http-proxy-middleware": "^0.20.0"
   },
   "scripts": {
-    "api": "elm-graphql http://localhost:8080/api/graphql --base API",
+    "api": "elm-graphql --schema-file ../backend/schema.graphql --base API",
     "build": "elm-app build",
     "start": "elm-app start",
     "test": "elm-app test"

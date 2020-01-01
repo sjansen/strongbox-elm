@@ -2,7 +2,7 @@
 -- https://github.com/dillonkearns/elm-graphql
 
 
-module API.Object.Message exposing (..)
+module API.Object.User exposing (..)
 
 import API.InputObject
 import API.Interface
@@ -19,6 +19,16 @@ import Graphql.SelectionSet exposing (SelectionSet)
 import Json.Decode as Decode
 
 
-body : SelectionSet String API.Object.Message
-body =
-    Object.selectionForField "String" "body" [] Decode.string
+givenName : SelectionSet String API.Object.User
+givenName =
+    Object.selectionForField "String" "givenName" [] Decode.string
+
+
+familyName : SelectionSet String API.Object.User
+familyName =
+    Object.selectionForField "String" "familyName" [] Decode.string
+
+
+email : SelectionSet String API.Object.User
+email =
+    Object.selectionForField "String" "email" [] Decode.string
