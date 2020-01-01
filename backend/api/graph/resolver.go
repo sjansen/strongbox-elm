@@ -3,6 +3,8 @@ package graph
 import (
 	"context"
 	"math/rand"
+
+	"github.com/sjansen/strongbox-elm/backend/api/auth"
 )
 
 var quotes = []string{
@@ -29,4 +31,18 @@ type queryResolver struct{ *Resolver }
 func (r *queryResolver) Message(ctx context.Context) (*Message, error) {
 	quote := quotes[rand.Intn(len(quotes))]
 	return &Message{Body: quote}, nil
+}
+
+func (r *queryResolver) Whoami(ctx context.Context) (*User, error) {
+	var resp *User
+
+	if user := auth.ForContext(ctx); user != nil {
+		resp = &User{
+			GivenName:  user.GivenName,
+			FamilyName: user.FamilyName,
+			Email:      user.Email,
+		}
+	}
+
+	return resp, nil
 }

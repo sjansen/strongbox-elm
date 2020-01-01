@@ -50,10 +50,14 @@ type Authenticator struct {
 func (a *Authenticator) Middleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		sm := a.SessionManager
-		user := &User{
-			Email:      sm.GetString(r.Context(), "email"),
-			FamilyName: sm.GetString(r.Context(), "family_name"),
-			GivenName:  sm.GetString(r.Context(), "given_name"),
+
+		var user *User
+		if email := sm.GetString(r.Context(), "email"); email != "" {
+			user = &User{
+				Email:      email,
+				FamilyName: sm.GetString(r.Context(), "family_name"),
+				GivenName:  sm.GetString(r.Context(), "given_name"),
+			}
 		}
 		ctx := context.WithValue(r.Context(), authCtxKey, user)
 

@@ -1,7 +1,14 @@
+type Query {
+  message: Message
+  whoami: User
+}
+
 type Message {
   body: String!
 }
 
-type Query {
-  message: Message
+type User {
+  givenName: String!
+  familyName: String!
+  email: String!
 }
