@@ -104,14 +104,31 @@ func (a *Authenticator) AuthCodeCallbackHandler(w http.ResponseWriter, r *http.R
 		return
 	}
 
-	jv := verifier.JwtVerifier{
+	accessTokenVerifier := verifier.JwtVerifier{
 		Issuer: a.Issuer,
 		ClaimsToValidate: map[string]string{
-			"nonce": sm.PopString(ctx, "auth-nonce"),
-			"aud":   a.ClientID,
+			"aud": "api://default",
+			"cid": a.ClientID,
 		},
 	}
-	result, err := jv.New().VerifyIdToken(idToken)
+	result, err := accessTokenVerifier.New().VerifyAccessToken(accessToken)
+	switch {
+	case err != nil:
+		http.Error(w, err.Error(), http.StatusInternalServerError)
+		return
+	case result == nil:
+		http.Error(w, "access_token validation failed", http.StatusInternalServerError)
+		return
+	}
+
+	idTokenVerifier := verifier.JwtVerifier{
+		Issuer: a.Issuer,
+		ClaimsToValidate: map[string]string{
+			"aud":   a.ClientID,
+			"nonce": sm.PopString(ctx, "auth-nonce"),
+		},
+	}
+	result, err = idTokenVerifier.New().VerifyIdToken(idToken)
 	switch {
 	case err != nil:
 		http.Error(w, err.Error(), http.StatusInternalServerError)
@@ -136,7 +153,7 @@ func (a *Authenticator) getTokens(code string, r *http.Request) (accessToken, id
 	q := r.URL.Query()
 	q.Add("code", code)
 	q.Add("grant_type", "authorization_code")
-	q.Add("redirect_uri", "http://localhost:8080/authorization-code/callback")
+	q.Add("redirect_uri", a.RedirectURL)
 	url := a.Issuer + "/v1/token?" + q.Encode()
 
 	req, _ := http.NewRequest("POST", url, bytes.NewReader([]byte{}))

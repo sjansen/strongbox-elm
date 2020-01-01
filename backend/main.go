@@ -63,9 +63,9 @@ func main() {
 		RedirectURL:    redirectURL,
 		SessionManager: sm,
 	}
+	mux.HandleFunc("/login/oauth/callback", auth.AuthCodeCallbackHandler)
 	mux.HandleFunc("/login", auth.LoginHandler)
 	mux.HandleFunc("/logout", auth.LogoutHandler)
-	mux.HandleFunc("/authorization-code/callback", auth.AuthCodeCallbackHandler)
 
 	handler := sm.LoadAndSave(
 		auth.Middleware(mux),
