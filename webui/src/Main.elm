@@ -1,112 +1,101 @@
 module Main exposing (Model, Msg(..), init, main, update, view)
 
-import Browser
+import Browser exposing (Document)
 import Browser.Navigation as Nav
-import Css exposing (..)
-import Html.Styled exposing (Html, a, div, h1, img, text, toUnstyled)
-import Html.Styled.Attributes exposing (css, href, src)
+import Html
+import Json.Decode exposing (Value)
+import LocalStorage exposing (decodeStorage, login, logout)
+import Page
+import Page.NotFound as NotFound
+import Page.Root as Root
+import Route exposing (Route)
+import Session exposing (Session)
 import Url exposing (Url)
-import Url.Parser as Url exposing ((</>), Parser)
+import Viewer exposing (Viewer)
 
 
-type Status
-    = Locked
-    | Unlocked
+type Model
+    = NotFound Session
+    | Main Root.Model
 
 
-urlToStatus : Url -> Status
-urlToStatus url =
-    url
-        |> Url.parse urlParser
-        |> Maybe.withDefault Locked
-
-
-urlParser : Parser (Status -> a) a
-urlParser =
-    Url.oneOf
-        [ Url.map Locked Url.top
-        , Url.map Unlocked (Url.s "unlocked")
-        ]
-
-
-type alias Model =
-    { key : Nav.Key
-    , status : Status
-    }
-
-
-init : () -> Url -> Nav.Key -> ( Model, Cmd Msg )
-init flags url key =
-    ( Model key (urlToStatus url), Cmd.none )
+init : Value -> Url -> Nav.Key -> ( Model, Cmd Msg )
+init flags url navKey =
+    let
+        maybeViewer =
+            decodeStorage flags
+    in
+    changeRouteTo (Route.fromUrl url)
+        (NotFound (Session.fromViewer navKey maybeViewer))
 
 
 type Msg
     = LinkClicked Browser.UrlRequest
     | UrlChanged Url
-
-
-subscriptions : Model -> Sub Msg
-subscriptions _ =
-    Sub.none
+    | GotRootMsg Root.Msg
+    | GotSessionMsg Session
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
-    case msg of
-        LinkClicked urlRequest ->
+    case ( msg, model ) of
+        ( LinkClicked urlRequest, _ ) ->
             case urlRequest of
                 Browser.Internal url ->
-                    ( model, Nav.pushUrl model.key (Url.toString url) )
+                    ( model
+                    , Nav.pushUrl
+                        (Session.navKey (toSession model))
+                        (Url.toString url)
+                    )
 
                 Browser.External href ->
                     ( model, Nav.load href )
 
-        UrlChanged url ->
-            ( { model | status = urlToStatus url }
-            , Cmd.none
+        ( UrlChanged url, _ ) ->
+            changeRouteTo (Route.fromUrl url) model
+
+        ( GotRootMsg subMsg, Main subModel ) ->
+            Root.update subMsg subModel
+                |> updateWith Main GotRootMsg model
+
+        ( GotSessionMsg session, _ ) ->
+            ( model
+            , Route.replaceUrl (Session.navKey session) Route.Root
             )
 
+        ( _, _ ) ->
+            ( model, Cmd.none )
 
-view : Model -> Browser.Document Msg
+
+view : Model -> Document Msg
 view model =
     let
-        body =
-            div
-                [ css
-                    [ backgroundColor (rgb 255 255 255)
-                    , border3 (px 1) solid (rgb 120 120 120)
-                    , margin2 (px 50) auto
-                    , padding (px 10)
-                    , width (px 200)
-                    , height (px 200)
-                    ]
-                ]
-                (case model.status of
-                    Locked ->
-                        [ a [ href "/unlocked" ]
-                            [ img [ src "/locked.svg" ] []
-                            ]
-                        ]
+        viewer =
+            Session.viewer (toSession model)
 
-                    Unlocked ->
-                        [ a [ href "/" ]
-                            [ img [ src "/unlocked.svg" ] []
-                            ]
-                        ]
-                )
+        viewPage page toMsg config =
+            let
+                { title, body } =
+                    Page.view viewer page config
+            in
+            { title = title
+            , body = List.map (Html.map toMsg) body
+            }
     in
-    { title =
-        case model.status of
-            Locked ->
-                "Strongbox - Locked"
+    case model of
+        NotFound _ ->
+            Page.view viewer Page.Main NotFound.view
 
-            Unlocked ->
-                "Strongbox - Unlocked"
-    , body = [ Html.Styled.toUnstyled body ]
-    }
+        Main model_ ->
+            viewPage Page.Main GotRootMsg (Root.view model_)
 
 
-main : Program () Model Msg
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Session.changes GotSessionMsg (Session.navKey (toSession model))
+
+
+main : Program Value Model Msg
 main =
     Browser.application
         { init = init
@@ -116,3 +105,49 @@ main =
         , onUrlChange = UrlChanged
         , onUrlRequest = LinkClicked
         }
+
+
+
+-- INTERNAL
+
+
+changeRouteTo : Maybe Route -> Model -> ( Model, Cmd Msg )
+changeRouteTo maybeRoute model =
+    let
+        session =
+            toSession model
+    in
+    case maybeRoute of
+        Just Route.Root ->
+            Root.init session
+                |> updateWith Main GotRootMsg model
+
+        Just Route.Login ->
+            ( model
+            , login (Viewer "jdoe@example.com" "Doe" "John")
+            )
+
+        Just Route.Logout ->
+            ( model
+            , logout
+            )
+
+        Nothing ->
+            ( NotFound session, Cmd.none )
+
+
+toSession : Model -> Session
+toSession page =
+    case page of
+        NotFound session ->
+            session
+
+        Main model ->
+            Root.toSession model
+
+
+updateWith : (subModel -> Model) -> (subMsg -> Msg) -> Model -> ( subModel, Cmd subMsg ) -> ( Model, Cmd Msg )
+updateWith toModel toMsg _ ( subModel, subCmd ) =
+    ( toModel subModel
+    , Cmd.map toMsg subCmd
+    )

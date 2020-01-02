@@ -1,6 +1,6 @@
 # Directories
-/.idea/
-/.vscode/
+.idea/
+.vscode/
 dist/
 
 # Files

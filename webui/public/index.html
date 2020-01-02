@@ -8,12 +8,56 @@
     <title>Strongbox</title>
     <style>
 html, body {
-  color: #000;
   background-color: #ddd;
+  color: #000;
   font-family: 'Roboto', sans-serif;
-  margin:0;
-  padding:0;
+  height: 100%;
+  margin: 0;
+  padding: 0;
 }
+
+.grid {
+  display: grid;
+  min-height: 100%;
+  grid-template-rows: auto 1fr auto;
+  grid-gap: 1em;
+}
+
+header,
+footer {
+  background-color: #444;
+  color: #fff;
+  padding: 1ex 2em;
+}
+
+#content {
+  margin: 1ex 2em;
+}
+
+header a,
+footer a {
+  color: #fff;
+  text-decoration: none;
+}
+
+header h1 {
+  float: left;
+  margin: 0;
+  padding: 0;
+}
+
+nav {
+  float: right;
+}
+
+nav ul {
+  list-style: none;
+}
+
+nav li {
+  display: inline;
+}
+
     </style>
   </head>
   <body style="background:#ddd;">
