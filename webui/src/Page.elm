@@ -15,7 +15,8 @@ import Viewer exposing (Viewer)
 
 
 type Page
-    = Main
+    = Other
+    | Main
 
 
 {-| Take a page's Html and frames it with a header and footer.

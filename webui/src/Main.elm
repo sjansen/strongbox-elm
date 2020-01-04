@@ -6,6 +6,7 @@ import Html
 import Json.Decode exposing (Value)
 import LocalStorage exposing (decodeStorage, login, logout)
 import Page
+import Page.Blank as Blank
 import Page.NotFound as NotFound
 import Page.Root as Root
 import Route exposing (Route)
@@ -15,8 +16,16 @@ import Viewer exposing (Viewer)
 
 
 type Model
-    = NotFound Session
+    = Redirect Session
+    | NotFound Session
     | Main Root.Model
+
+
+type Msg
+    = LinkClicked Browser.UrlRequest
+    | UrlChanged Url
+    | GotRootMsg Root.Msg
+    | GotSession Session
 
 
 init : Value -> Url -> Nav.Key -> ( Model, Cmd Msg )
@@ -26,14 +35,7 @@ init flags url navKey =
             decodeStorage flags
     in
     changeRouteTo (Route.fromUrl url)
-        (NotFound (Session.fromViewer navKey maybeViewer))
-
-
-type Msg
-    = LinkClicked Browser.UrlRequest
-    | UrlChanged Url
-    | GotRootMsg Root.Msg
-    | GotSessionMsg Session
+        (Redirect (Session.fromViewer navKey maybeViewer))
 
 
 update : Msg -> Model -> ( Model, Cmd Msg )
@@ -58,7 +60,7 @@ update msg model =
             Root.update subMsg subModel
                 |> updateWith Main GotRootMsg model
 
-        ( GotSessionMsg session, _ ) ->
+        ( GotSession session, _ ) ->
             ( model
             , Route.replaceUrl (Session.navKey session) Route.Root
             )
@@ -84,7 +86,10 @@ view model =
     in
     case model of
         NotFound _ ->
-            Page.view viewer Page.Main NotFound.view
+            Page.view viewer Page.Other NotFound.view
+
+        Redirect _ ->
+            Page.view viewer Page.Other Blank.view
 
         Main model_ ->
             viewPage Page.Main GotRootMsg (Root.view model_)
@@ -92,7 +97,15 @@ view model =
 
 subscriptions : Model -> Sub Msg
 subscriptions model =
-    Session.changes GotSessionMsg (Session.navKey (toSession model))
+    case model of
+        NotFound _ ->
+            Sub.none
+
+        Redirect _ ->
+            Session.changes GotSession (Session.navKey (toSession model))
+
+        Main m ->
+            Sub.map GotRootMsg (Root.subscriptions m)
 
 
 main : Program Value Model Msg
@@ -124,12 +137,18 @@ changeRouteTo maybeRoute model =
 
         Just Route.Login ->
             ( model
-            , login (Viewer "jdoe@example.com" "Doe" "John")
+            , Cmd.batch
+                [ login (Viewer "jdoe@example.com" "Doe" "John")
+                , Nav.replaceUrl (Session.navKey session) "/"
+                ]
             )
 
         Just Route.Logout ->
             ( model
-            , logout
+            , Cmd.batch
+                [ logout
+                , Nav.replaceUrl (Session.navKey session) "/"
+                ]
             )
 
         Nothing ->
@@ -140,6 +159,9 @@ toSession : Model -> Session
 toSession page =
     case page of
         NotFound session ->
+            session
+
+        Redirect session ->
             session
 
         Main model ->

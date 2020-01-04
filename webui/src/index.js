@@ -22,7 +22,7 @@ app.ports.cache.subscribe(function(val) {
 // Whenever localStorage changes in another tab, report it if necessary.
 window.addEventListener("storage", function(event) {
   if (event.storageArea === localStorage && event.key === storageKey) {
-    app.ports.onStoreChange.send(event.newValue);
+    app.ports.onStoreChange.send(JSON.parse(event.newValue));
   }
 }, false);
 

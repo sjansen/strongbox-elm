@@ -1,4 +1,4 @@
-module Page.Root exposing (Model, Msg, init, toSession, update, view)
+module Page.Root exposing (Model, Msg, init, subscriptions, toSession, update, view)
 
 import Css exposing (..)
 import Html.Styled exposing (Html, br, button, div, img, text)
@@ -14,8 +14,9 @@ type alias Model =
 
 
 type Msg
-    = Lock
-    | Unlock
+    = GotSession Session
+    | Locked
+    | Unlocked
 
 
 init : Session -> ( Model, Cmd Msg )
@@ -27,6 +28,11 @@ init session =
     )
 
 
+subscriptions : Model -> Sub Msg
+subscriptions model =
+    Session.changes GotSession (Session.navKey model.session)
+
+
 toSession : Model -> Session
 toSession model =
     model.session
@@ -35,17 +41,20 @@ toSession model =
 update : Msg -> Model -> ( Model, Cmd Msg )
 update msg model =
     case ( msg, model.unlocked ) of
-        ( Lock, True ) ->
+        ( Locked, True ) ->
             ( { model | unlocked = False }, Cmd.none )
 
-        ( Lock, False ) ->
+        ( Locked, False ) ->
             ( model, Cmd.none )
 
-        ( Unlock, True ) ->
+        ( Unlocked, True ) ->
             ( model, Cmd.none )
 
-        ( Unlock, False ) ->
+        ( Unlocked, False ) ->
             ( { model | unlocked = True }, Cmd.none )
+
+        ( GotSession session, _ ) ->
+            ( { model | session = session }, Cmd.none )
 
 
 view : Model -> { title : String, content : Html Msg }
@@ -53,10 +62,10 @@ view model =
     let
         ( imgSrc, label, msg ) =
             if model.unlocked then
-                ( "/unlocked.svg", "Lock", Lock )
+                ( "/unlocked.svg", "Lock", Locked )
 
             else
-                ( "/locked.svg", "Unlock", Unlock )
+                ( "/locked.svg", "Unlock", Unlocked )
     in
     { title = ""
     , content =
