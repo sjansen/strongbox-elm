@@ -10,6 +10,6 @@ require (
 	github.com/lestrrat-go/jwx v0.9.0 // indirect
 	github.com/okta/okta-jwt-verifier-golang v0.1.0
 	github.com/sjansen/dynamostore v0.0.0-20190906003556-61db315e6cf0
-	github.com/stretchr/testify v1.4.0
+	github.com/stretchr/testify v1.6.0
 	github.com/vektah/gqlparser v1.2.0
 )
